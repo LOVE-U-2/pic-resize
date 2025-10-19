@@ -1,0 +1,644 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Photo Crop & Resize Tool</title>
+  
+  <link href="https://unpkg.com/cropperjs@1.5.13/dist/cropper.min.css" rel="stylesheet" />
+  <script src="https://unpkg.com/cropperjs@1.5.13/dist/cropper.min.js"></script>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Spicy+Rice&display=swap" rel="stylesheet">
+  
+  <style>
+    /* --- Base Styles & Animated Background --- */
+    :root {
+      --primary-color: #00a8ff;
+      --panel-bg: rgba(255, 255, 255, 0.1);
+      --panel-border: rgba(255, 255, 255, 0.2);
+      --text-color: #ffffff; /* CHANGED FROM #f0f0f0 TO #ffffff (PURE WHITE) */
+      --text-muted-color: #cccccc;
+      --shadow-color: rgba(0, 0, 0, 0.15);
+      --success-color: #00c49a;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      color: var(--text-color);
+      background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
+      background-size: 400% 400%;
+      animation: gradient 15s ease infinite;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+    }
+
+    @keyframes gradient {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    /* --- Main Layout --- */
+    .container {
+      width: 100%;
+      max-width: 1400px;
+      margin: auto;
+    }
+    
+    .main-title {
+        text-align: center;
+        font-size: 2.5rem;
+        font-weight: 600;
+        margin-bottom: 2rem;
+        text-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    }
+    
+    .grid-layout {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+    }
+
+    @media (min-width: 1024px) {
+      .grid-layout {
+        grid-template-columns: 320px 1fr 320px;
+      }
+    }
+
+    /* --- Glass Panel Effect --- */
+    .glass-panel {
+      background: var(--panel-bg);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--panel-border);
+      border-radius: 20px;
+      padding: 1.5rem;
+      box-shadow: 0 8px 32px 0 var(--shadow-color);
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+    
+    .panel-title {
+  font-weight: 600;
+  font-size: 1.2rem;
+  background: linear-gradient(90deg, #faff77, #ff00c8);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  border-bottom: 1px solid rgba(255,255,255,0.2);
+  padding-bottom: 0.75rem;
+  text-shadow: 0 2px 6px rgba(0,0,0,0.2);
+}
+
+    /* --- Form Elements & UI Components --- */
+    .form-group label, .info-list-title {
+        font-size: 0.9rem;
+        font-weight: 500;
+        display: block;
+        margin-bottom: 0.5rem;
+    }
+    
+    input, select {
+        width: 100%;
+        background: rgba(0,0,0,0.2);
+        border: 1px solid var(--panel-border);
+        border-radius: 8px;
+        padding: 0.75rem;
+        color: var(--text-color);
+        font-family: 'Poppins', sans-serif;
+        font-size: 0.9rem;
+        transition: all 0.2s ease;
+    }
+
+    input:focus, select:focus {
+        outline: none;
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(0, 168, 255, 0.3);
+    }
+    
+    select { appearance: none; background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23cccccc' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e"); background-position: right 0.5rem center; background-repeat: no-repeat; background-size: 1.5em 1.5em; padding-right: 2.5rem;}
+    
+    option { background: #2c3e50; }
+
+    input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+    input[type=number] { -moz-appearance: textfield; }
+
+    .input-group { display: flex; gap: 0.75rem; }
+    .input-group input { text-align: center; }
+
+    .info-list { list-style: none; font-size: 0.85rem; color: var(--text-muted-color); line-height: 1.6; }
+    .info-list span { color: var(--text-color); font-weight: 500; }
+    
+    /* ADDED: Style for the output size text */
+    .large-bold-text {
+        font-size: 1.2rem !important; /* Make it slightly larger */
+        font-weight: 700 !important; /* Make it extra bold */
+        color: #ffffff !important; /* Optional: give it a distinct color */
+    }
+    
+    .note { font-size: 0.75rem; color: var(--text-muted-color); text-align: center; margin-top: 0.25rem; }
+    
+    /* Custom File Upload */
+    .file-upload-label {
+        border: 2px dashed var(--panel-border);
+        border-radius: 12px;
+        padding: 2rem 1rem;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    .file-upload-label:hover {
+        background: rgba(0,0,0,0.1);
+        border-color: var(--primary-color);
+    }
+    .file-upload-label svg { margin: 0 auto 0.75rem auto; display: block; }
+    .file-upload-label span { font-weight: 500; }
+    .file-upload-label p { font-size: 0.8rem; color: var(--text-muted-color); }
+    #fileInput { width: 0.1px; height: 0.1px; opacity: 0; overflow: hidden; position: absolute; z-index: -1; }
+
+    /* 🌈 Modern Colorful Buttons */
+.btn {
+  position: relative;
+  overflow: hidden;
+  padding: 0.75rem 1rem;
+  border: none;
+  border-radius: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #fff;
+  background: linear-gradient(135deg, #6a11cb, #2575fc);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.btn::before {
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle at center, rgba(255, 255, 255, 0.25), transparent 70%);
+  transform: rotate(45deg);
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+.btn:hover::before {
+  opacity: 1;
+}
+
+.btn:hover {
+  transform: translateY(-2px) scale(1.03);
+  box-shadow: 0 8px 20px rgba(0, 168, 255, 0.4);
+}
+
+/* ✨ Variants */
+.btn-primary {
+  background: linear-gradient(135deg, #ff6a00, #ee0979);
+}
+
+.btn-primary:hover {
+  box-shadow: 0 8px 20px rgba(255, 105, 180, 0.5);
+}
+
+.btn-success {
+  background: linear-gradient(135deg, #00b09b, #96c93d);
+}
+
+.btn-success:hover {
+  box-shadow: 0 8px 20px rgba(150, 201, 61, 0.5);
+}
+
+.btn-icon {
+  padding: 0.6rem;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #23a6d5, #23d5ab);
+  transition: all 0.3s ease;
+}
+
+.btn-icon:hover {
+  transform: scale(1.1);
+  box-shadow: 0 0 15px rgba(35, 213, 171, 0.5);
+}
+    
+    /* Cropper Area */
+    .cropper-container { background: rgba(0,0,0,0.3); border-radius: 12px; }
+    .cropper-bg { background-image: none; }
+    .crop-area-wrapper {
+        width: 100%;
+        height: 500px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+    }
+    #sourceImage { max-width: 100%; max-height: 100%; display: none; }
+
+    /* Result Preview */
+    .preview-wrap {
+      min-height: 220px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0,0,0,0.25);
+      border: 1px dashed var(--panel-border);
+      border-radius: 12px;
+      padding: 1rem;
+    }
+    .preview-wrap span { color: var(--text-muted-color); }
+
+    /* Quality Slider */
+    input[type=range] {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 100%;
+        height: 8px;
+        background: rgba(0,0,0,0.3);
+        border-radius: 5px;
+        padding: 0;
+        margin-top: 0.5rem;
+    }
+    input[type=range]::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 20px;
+        height: 20px;
+        background: var(--primary-color);
+        cursor: pointer;
+        border-radius: 50%;
+        border: 3px solid #fff;
+    }
+    input[type=range]::-moz-range-thumb {
+        width: 16px;
+        height: 16px;
+        background: var(--primary-color);
+        cursor: pointer;
+        border-radius: 50%;
+        border: 3px solid #fff;
+    }
+    
+    footer {
+        position: absolute;
+        bottom: 1rem;
+        width: 100%;
+        text-align: center;
+        font-size: 0.8rem;
+        color: rgba(255,255,255,0.7);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1 style="font-family: 'Spicy Rice', cursive;text-align: center;
+        font-size: 2.5rem;
+        font-weight: 100;
+        margin-bottom: 2rem;
+        text-shadow: 0 2px 8px rgba(0,0,0,0.3);">Photo Crop & Resize Tool</h1>
+
+    <div class="grid-layout">
+      <div class="glass-panel">
+        
+        <label for="fileInput" class="file-upload-label">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+            <span>Click to upload photo</span>
+            <p>PNG, JPG, WEBP, etc.</p>
+        </label>
+        <input id="fileInput" type="file" accept="image/*" />
+
+        <div>
+            <h2 class="panel-title">Original Info</h2>
+            <ul class="info-list">
+              <li id="origName">Filename: <span>—</span></li>
+              <li id="origDim">Dimensions: <span>—</span></li>
+              <li id="origSize">File size: <span>—</span></li>
+              <li id="origType">File type: <span>—</span></li>
+            </ul>
+        </div>
+        
+        <div>
+            <h2 class="panel-title">Settings</h2>
+            <div class="form-group">
+                <label for="ratioSelect">Crop Presets</label>
+                <select id="ratioSelect">
+                  <option value="0" selected>Freehand (No Constraint)</option>
+                  <option value="1">Square (1:1)</option>
+                  <option value="5/4">Standard Print (5:4)</option>
+                  <option value="4/3">Standard Photo/Display (4:3)</option>
+                  <option value="3/2">Classic Photo (3:2)</option>
+                  <option value="7/5">Large Print (7:5)</option>
+                  <option value="16/9">Widescreen/Video (16:9)</option>
+                  <option value="4/5">Vertical Print (4:5)</option>
+                  <option value="3/4">Portrait Photo (3:4)</option>
+                  <option value="2/3">Portrait Classic (2:3)</option>
+                </select>
+            </div>
+            <div class="form-group" style="margin-top: 1.25rem;">
+                <label>Custom output size (px)</label>
+                <div class="input-group">
+                  <input id="outW" type="number" min="1" placeholder="width" />
+                  <input id="outH" type="number" min="1" placeholder="height" />
+                </div>
+                <p class="note">Leave blank for native scale.</p>
+            </div>
+        </div>
+
+      </div>
+
+      <div class="glass-panel">
+        <h2 class="panel-title">Crop Area</h2>
+        <div class="crop-area-wrapper">
+          <img id="sourceImage" alt="Source" />
+        </div>
+        <div class="btn-group">
+            <button id="zoomIn" class="btn btn-icon" title="Zoom In (+)">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="11" y1="8" x2="11" y2="14"></line><line x1="8" y1="11" x2="14" y2="11"></line></svg>
+            </button>
+            <button id="zoomOut" class="btn btn-icon" title="Zoom Out (-)">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="8" y1="11" x2="14" y2="11"></line></svg>
+            </button>
+            <button id="reset" class="btn btn-icon" title="Reset Crop">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+            </button>
+        </div>
+        <div class="form-group">
+            <label>Quality: <span id="qualityVal">0.90</span></label>
+            <input id="quality" type="range" min="0.1" max="1" step="0.01" value="0.9" />
+            <p class="note">JPEG/WEBP compression (10% - 100%).</p>
+        </div>
+        <div class="btn-group" style="margin-top: auto; ">
+             <button id="exportBtn" class="btn btn-primary">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6.13 1L6 16a2 2 0 0 0 2 2h15"></path><path d="M1 6.13L16 6a2 2 0 0 1 2 2v15"></path></svg>
+                Crop Image
+             </button>
+             <button id="clearBtn" class="btn">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                Clear
+             </button>
+        </div>
+      </div>
+
+      <div class="glass-panel">
+        <h2 class="panel-title">Result</h2>
+        <div class="preview-wrap" id="resultPreview">
+          <span>Preview will appear here</span>
+        </div>
+        
+        <div class="form-group">
+            <label for="formatSelect">Output Format</label>
+            <select id="formatSelect">
+              <option value="image/jpeg">JPEG</option>
+              <option value="image/png">PNG (Lossless)</option>
+              <option value="image/webp">WEBP</option>
+            </select>
+        </div>
+
+        <div>
+            <h2 class="panel-title">Output Info</h2>
+            <ul class="info-list">
+              <li id="resDim"><strong>Output dimensions:</strong> <span>—</span></li>
+              <li id="resSize"><strong>Output file size:</strong> <span class="large-bold-text">—</span></li>
+              <li id="resType"><strong>Output type:</strong> <span>JPEG</span></li>
+            </ul>
+        </div>
+        
+        <a id="downloadLink" class="btn btn-success hidden" style="margin-top: auto;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+            Download
+        </a>
+      </div>
+
+    </div>
+
+    <footer class="mt-6 text-xs text-gray-500"></footer>
+  </div>
+
+  <script>
+    // Elements
+    const fileInput = document.getElementById('fileInput');
+    const srcImg = document.getElementById('sourceImage');
+    const origName = document.getElementById('origName');
+    const origDim = document.getElementById('origDim');
+    const origSize = document.getElementById('origSize');
+    const origType = document.getElementById('origType');
+    // const presetBtns = document.querySelectorAll('.preset-btn'); // REMOVED
+    const ratioSelect = document.getElementById('ratioSelect'); // ADDED
+    const zoomIn = document.getElementById('zoomIn');
+    const zoomOut = document.getElementById('zoomOut');
+    const resetBtn = document.getElementById('reset');
+    const quality = document.getElementById('quality');
+    const qualityVal = document.getElementById('qualityVal');
+    const exportBtn = document.getElementById('exportBtn');
+    const resultPreview = document.getElementById('resultPreview');
+    const resDim = document.getElementById('resDim');
+    const resSize = document.getElementById('resSize');
+    const downloadLink = document.getElementById('downloadLink');
+    const outW = document.getElementById('outW');
+    const outH = document.getElementById('outH');
+    const clearBtn = document.getElementById('clearBtn');
+    const formatSelect = document.getElementById('formatSelect');
+
+    let cropper = null;
+    let currentFile = null;
+
+    function formatBytes(bytes){
+      if(!bytes) return '—';
+      const mb = bytes / (1024*1024);
+      return mb.toFixed(3) + ' MB';
+    }
+    
+    // --- Core Logic: Update Preview and Prepare Export (Live Canvas) ---
+    function updatePreviewAndExport(){
+      if(!cropper) return;
+      
+      const mimeType = formatSelect.value;
+      const qualityValue = parseFloat(quality.value);
+      
+      // Get crop box data
+      const cropData = cropper.getData(true); // rounded
+      
+      // Decide output size
+      let targetW = parseInt(outW.value) || Math.round(cropData.width);
+      let targetH = parseInt(outH.value) || Math.round(cropData.height);
+      
+      // Get canvas
+      const canvas = cropper.getCroppedCanvas({ 
+          width: targetW, 
+          height: targetH, 
+          imageSmoothingEnabled: true 
+      });
+      if(!canvas){ return; }
+
+      // 1. Show Preview
+      resultPreview.innerHTML = '';
+      const img = document.createElement('img');
+      img.style.maxWidth = '100%';
+      img.style.maxHeight = '300px';
+      
+      let dataURL;
+      if (mimeType === 'image/png') {
+          dataURL = canvas.toDataURL(mimeType, 1.0);
+      } else {
+          dataURL = canvas.toDataURL(mimeType, qualityValue);
+      }
+
+      img.src = dataURL;
+      resultPreview.appendChild(img);
+
+      // 2. Update Info
+      // Update dimensions (keeping the bold prefix and only updating the span content)
+      resDim.querySelector('span').textContent = `${targetW} × ${targetH} px`;
+      // Update type
+      resType.querySelector('span').textContent = mimeType.split('/')[1].toUpperCase();
+
+
+      // 3. Prepare Download
+      canvas.toBlob((blob)=>{
+        if(!blob) return;
+        
+        // Target the span inside resSize to update only the value
+        const resSizeSpan = resSize.querySelector('span');
+        resSizeSpan.textContent = formatBytes(blob.size);
+        
+        // create download link
+        const url = URL.createObjectURL(blob);
+        downloadLink.href = url;
+        
+        const ext = (mimeType === 'image/png') ? 'png' : (mimeType === 'image/webp' ? 'webp' : 'jpg');
+        const outName = (currentFile && currentFile.name) ? (currentFile.name.replace(/\.[^/.]+$/, '') + '✓') : ('cropped.' + ext);
+        
+        downloadLink.download = outName;
+        downloadLink.textContent = 'Download: ' + outName;
+        downloadLink.classList.remove('hidden');
+      }, mimeType, qualityValue);
+    }
+    // -------------------------------------------------------------------
+
+
+    fileInput.addEventListener('change', (e)=>{
+      const f = e.target.files && e.target.files[0];
+      if(!f) return;
+      currentFile = f;
+      origName.textContent = 'Filename: ' + f.name;
+      origSize.textContent = 'File size: ' + formatBytes(f.size);
+      origType.textContent = 'File type: ' + f.type;
+
+      const reader = new FileReader();
+      reader.onload = function(ev){
+        srcImg.src = ev.target.result;
+        srcImg.style.display = 'block';
+        // Wait for natural size
+        srcImg.onload = function(){
+          origDim.textContent = `Dimensions: ${srcImg.naturalWidth} × ${srcImg.naturalHeight} px`;
+          // init cropper
+          if(cropper) { cropper.destroy(); cropper = null; }
+          cropper = new Cropper(srcImg, {
+            viewMode: 1,
+            background: true,
+            autoCropArea: 0.85,
+            movable: true,
+            zoomable: true,
+            scalable: false,
+            rotatable: false,
+            responsive: true,
+            // ADDED: Live update events
+            cropmove: updatePreviewAndExport,
+            cropend: updatePreviewAndExport,
+            zoom: updatePreviewAndExport
+          });
+          // Set initial ratio to Freehand (NaN)
+          cropper.setAspectRatio(NaN); 
+          // Perform initial export to populate result section
+          setTimeout(updatePreviewAndExport, 100); 
+        }
+      }
+      reader.readAsDataURL(f);
+    });
+
+    // NEW: Preset aspect ratio selector listener
+    ratioSelect.addEventListener('change', ()=>{
+        if(!cropper) return;
+        const r = ratioSelect.value;
+        const ratio = Number(r);
+        
+        // Set aspect ratio: NaN for freehand (0), otherwise evaluate the fraction
+        if(ratio === 0) {
+            cropper.setAspectRatio(NaN); 
+        } else {
+            // Use eval() to safely handle fraction string like "4/3"
+            // Note: eval is generally discouraged, but common practice here
+            // because Cropper.js expects a number (e.g., 1.333)
+            cropper.setAspectRatio(eval(r));
+        }
+        
+        // Auto-update preview
+        updatePreviewAndExport();
+    });
+
+    zoomIn.addEventListener('click', ()=>{ if(cropper) cropper.zoom(0.1); });
+    zoomOut.addEventListener('click', ()=>{ if(cropper) cropper.zoom(-0.1); });
+    resetBtn.addEventListener('click', ()=>{ 
+        if(cropper) cropper.reset(); 
+    });
+
+    // Input/Select listeners for live update
+    quality.addEventListener('input', ()=>{ 
+        qualityVal.textContent = quality.value;
+        updatePreviewAndExport();
+    });
+    outW.addEventListener('input', updatePreviewAndExport);
+    outH.addEventListener('input', updatePreviewAndExport);
+    formatSelect.addEventListener('change', updatePreviewAndExport);
+
+    // Export button now just calls the function (mainly for initial click/convenience)
+    exportBtn.addEventListener('click', updatePreviewAndExport);
+
+    clearBtn.addEventListener('click', ()=>{
+      if(cropper){ cropper.destroy(); cropper = null; }
+      srcImg.src = '';
+      srcImg.style.display = 'none';
+      origName.textContent = 'Filename: —';
+      origDim.textContent = 'Dimensions: —';
+      origSize.textContent = 'File size: —';
+      origType.textContent = 'File type: —';
+      resultPreview.innerHTML = '<span>Preview will appear here</span>';
+      
+      // Clear all result spans
+      resDim.querySelector('span').textContent = '—';
+      resSize.querySelector('span').textContent = '—';
+      resType.querySelector('span').textContent = 'JPEG';
+      
+      downloadLink.classList.add('hidden');
+      fileInput.value = null;
+      currentFile = null;
+      ratioSelect.value = '0'; // Reset dropdown to Freehand
+    });
+
+    // Keyboard shortcuts for convenience
+    window.addEventListener('keydown', (e)=>{
+      if(!cropper) return;
+      if(e.key === '+') cropper.zoom(0.1);
+      if(e.key === '-') cropper.zoom(-0.1);
+    });
+
+  </script>
+</body>
+</html>
