@@ -379,6 +379,19 @@
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
             </button>
         </div>
+        
+        <div class="form-group">
+            <label>Rotation: <span id="rotationVal">0°</span></label>
+            <div class="input-group" style="align-items: center;">
+                <button id="rotateLeft" class="btn btn-icon" title="Rotate -90°">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 2v6h6M21.5 22v-6h-6"></path><path d="M22 11.5A10 10 0 0 0 3.5 12.5"></path></svg>
+                </button>
+                <input id="rotation" type="range" min="-180" max="180" step="1" value="0" style="margin-top: 0;">
+                <button id="rotateRight" class="btn btn-icon" title="Rotate +90°">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 22v-6h-6M2.5 2v6h6"></path><path d="M2.5 12.5a10 10 0 0 0 19-1"></path></svg>
+                </button>
+            </div>
+        </div>
         <div class="form-group">
             <label>Quality: <span id="qualityVal">0.90</span></label>
             <input id="quality" type="range" min="0.1" max="1" step="0.01" value="0.9" />
@@ -439,11 +452,16 @@
     const origDim = document.getElementById('origDim');
     const origSize = document.getElementById('origSize');
     const origType = document.getElementById('origType');
-    // const presetBtns = document.querySelectorAll('.preset-btn'); // REMOVED
-    const ratioSelect = document.getElementById('ratioSelect'); // ADDED
+    const ratioSelect = document.getElementById('ratioSelect');
     const zoomIn = document.getElementById('zoomIn');
     const zoomOut = document.getElementById('zoomOut');
     const resetBtn = document.getElementById('reset');
+    // --- NEW Rotation elements ---
+    const rotation = document.getElementById('rotation');
+    const rotationVal = document.getElementById('rotationVal');
+    const rotateLeft = document.getElementById('rotateLeft');
+    const rotateRight = document.getElementById('rotateRight');
+    // ---
     const quality = document.getElementById('quality');
     const qualityVal = document.getElementById('qualityVal');
     const exportBtn = document.getElementById('exportBtn');
@@ -504,29 +522,24 @@
       resultPreview.appendChild(img);
 
       // 2. Update Info
-      // Update dimensions (keeping the bold prefix and only updating the span content)
       resDim.querySelector('span').textContent = `${targetW} × ${targetH} px`;
-      // Update type
       resType.querySelector('span').textContent = mimeType.split('/')[1].toUpperCase();
-
 
       // 3. Prepare Download
       canvas.toBlob((blob)=>{
         if(!blob) return;
         
-        // Target the span inside resSize to update only the value
         const resSizeSpan = resSize.querySelector('span');
         resSizeSpan.textContent = formatBytes(blob.size);
         
-        // create download link
         const url = URL.createObjectURL(blob);
         downloadLink.href = url;
         
         const ext = (mimeType === 'image/png') ? 'png' : (mimeType === 'image/webp' ? 'webp' : 'jpg');
-        const outName = (currentFile && currentFile.name) ? (currentFile.name.replace(/\.[^/.]+$/, '') + '✓') : ('cropped.' + ext);
+        const outName = (currentFile && currentFile.name) ? (currentFile.name.replace(/\.[^/.]+$/, '') + '✓.' + ext) : ('cropped.' + ext);
         
         downloadLink.download = outName;
-        downloadLink.textContent = 'Download: ' + outName;
+        downloadLink.textContent = 'Download Image';
         downloadLink.classList.remove('hidden');
       }, mimeType, qualityValue);
     }
@@ -545,10 +558,9 @@
       reader.onload = function(ev){
         srcImg.src = ev.target.result;
         srcImg.style.display = 'block';
-        // Wait for natural size
+        
         srcImg.onload = function(){
           origDim.textContent = `Dimensions: ${srcImg.naturalWidth} × ${srcImg.naturalHeight} px`;
-          // init cropper
           if(cropper) { cropper.destroy(); cropper = null; }
           cropper = new Cropper(srcImg, {
             viewMode: 1,
@@ -557,47 +569,67 @@
             movable: true,
             zoomable: true,
             scalable: false,
-            rotatable: false,
+            rotatable: true, // Enable rotation
             responsive: true,
-            // ADDED: Live update events
-            cropmove: updatePreviewAndExport,
-            cropend: updatePreviewAndExport,
-            zoom: updatePreviewAndExport
+            // UPDATED: Use 'crop' event for all changes (zoom, move, rotate)
+            crop: updatePreviewAndExport
           });
-          // Set initial ratio to Freehand (NaN)
+          
           cropper.setAspectRatio(NaN); 
-          // Perform initial export to populate result section
           setTimeout(updatePreviewAndExport, 100); 
         }
       }
       reader.readAsDataURL(f);
     });
 
-    // NEW: Preset aspect ratio selector listener
     ratioSelect.addEventListener('change', ()=>{
         if(!cropper) return;
         const r = ratioSelect.value;
         const ratio = Number(r);
         
-        // Set aspect ratio: NaN for freehand (0), otherwise evaluate the fraction
         if(ratio === 0) {
             cropper.setAspectRatio(NaN); 
         } else {
-            // Use eval() to safely handle fraction string like "4/3"
-            // Note: eval is generally discouraged, but common practice here
-            // because Cropper.js expects a number (e.g., 1.333)
             cropper.setAspectRatio(eval(r));
         }
-        
-        // Auto-update preview
-        updatePreviewAndExport();
     });
 
     zoomIn.addEventListener('click', ()=>{ if(cropper) cropper.zoom(0.1); });
     zoomOut.addEventListener('click', ()=>{ if(cropper) cropper.zoom(-0.1); });
+    
     resetBtn.addEventListener('click', ()=>{ 
-        if(cropper) cropper.reset(); 
+        if(cropper) {
+            cropper.reset();
+            // Also reset rotation slider UI
+            rotation.value = 0;
+            rotationVal.textContent = '0°';
+        }
     });
+    
+    // --- NEW Rotation Event Listeners ---
+    rotation.addEventListener('input', ()=>{
+      if(!cropper) return;
+      const val = rotation.value;
+      rotationVal.textContent = `${val}°`;
+      cropper.rotateTo(Number(val));
+    });
+    
+    rotateLeft.addEventListener('click', ()=>{
+        if(!cropper) return;
+        cropper.rotate(-90);
+        const currentRotation = Math.round(cropper.getData().rotate);
+        rotation.value = currentRotation;
+        rotationVal.textContent = `${currentRotation}°`;
+    });
+    
+    rotateRight.addEventListener('click', ()=>{
+        if(!cropper) return;
+        cropper.rotate(90);
+        const currentRotation = Math.round(cropper.getData().rotate);
+        rotation.value = currentRotation;
+        rotationVal.textContent = `${currentRotation}°`;
+    });
+    // ---
 
     // Input/Select listeners for live update
     quality.addEventListener('input', ()=>{ 
@@ -608,7 +640,6 @@
     outH.addEventListener('input', updatePreviewAndExport);
     formatSelect.addEventListener('change', updatePreviewAndExport);
 
-    // Export button now just calls the function (mainly for initial click/convenience)
     exportBtn.addEventListener('click', updatePreviewAndExport);
 
     clearBtn.addEventListener('click', ()=>{
@@ -621,7 +652,6 @@
       origType.textContent = 'File type: —';
       resultPreview.innerHTML = '<span>Preview will appear here</span>';
       
-      // Clear all result spans
       resDim.querySelector('span').textContent = '—';
       resSize.querySelector('span').textContent = '—';
       resType.querySelector('span').textContent = 'JPEG';
@@ -629,7 +659,10 @@
       downloadLink.classList.add('hidden');
       fileInput.value = null;
       currentFile = null;
-      ratioSelect.value = '0'; // Reset dropdown to Freehand
+      ratioSelect.value = '0';
+      // Reset rotation UI
+      rotation.value = 0;
+      rotationVal.textContent = '0°';
     });
 
     // Keyboard shortcuts for convenience
