@@ -92,15 +92,15 @@
     }
     
     .panel-title {
-  font-weight: 600;
-  font-size: 1.2rem;
-  background: linear-gradient(90deg, #faff77, #ff00c8);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  border-bottom: 1px solid rgba(255,255,255,0.2);
-  padding-bottom: 0.75rem;
-  text-shadow: 0 2px 6px rgba(0,0,0,0.2);
-}
+      font-weight: 600;
+      font-size: 1.2rem;
+      background: linear-gradient(90deg, #faff77, #ff00c8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      border-bottom: 1px solid rgba(255,255,255,0.2);
+      padding-bottom: 0.75rem;
+      text-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    }
 
     /* --- Form Elements & UI Components --- */
     .form-group label, .info-list-title {
@@ -141,16 +141,14 @@
     .info-list { list-style: none; font-size: 0.85rem; color: var(--text-muted-color); line-height: 1.6; }
     .info-list span { color: var(--text-color); font-weight: 500; }
     
-    /* ADDED: Style for the output size text */
     .large-bold-text {
-        font-size: 1.2rem !important; /* Make it slightly larger */
-        font-weight: 700 !important; /* Make it extra bold */
-        color: #ffffff !important; /* Optional: give it a distinct color */
+        font-size: 1.2rem !important;
+        font-weight: 700 !important;
+        color: #ffffff !important;
     }
     
     .note { font-size: 0.75rem; color: var(--text-muted-color); text-align: center; margin-top: 0.25rem; }
     
-    /* Custom File Upload */
     .file-upload-label {
         border: 2px dashed var(--panel-border);
         border-radius: 12px;
@@ -168,7 +166,6 @@
     .file-upload-label p { font-size: 0.8rem; color: var(--text-muted-color); }
     #fileInput { width: 0.1px; height: 0.1px; opacity: 0; overflow: hidden; position: absolute; z-index: -1; }
 
-    /* 🌈 Modern Colorful Buttons */
 .btn {
   position: relative;
   overflow: hidden;
@@ -211,7 +208,6 @@
   box-shadow: 0 8px 20px rgba(0, 168, 255, 0.4);
 }
 
-/* ✨ Variants */
 .btn-primary {
   background: linear-gradient(135deg, #ff6a00, #ee0979);
 }
@@ -240,12 +236,11 @@
   box-shadow: 0 0 15px rgba(35, 213, 171, 0.5);
 }
     
-    /* Cropper Area */
     .cropper-container { background: rgba(0,0,0,0.3); border-radius: 12px; }
     .cropper-bg { background-image: none; }
     .crop-area-wrapper {
         width: 100%;
-        height: 500px;
+        height: 500px; /* Adjusted height for better layout */
         display: flex;
         align-items: center;
         justify-content: center;
@@ -253,7 +248,6 @@
     }
     #sourceImage { max-width: 100%; max-height: 100%; display: none; }
 
-    /* Result Preview */
     .preview-wrap {
       min-height: 220px;
       display: flex;
@@ -266,7 +260,6 @@
     }
     .preview-wrap span { color: var(--text-muted-color); }
 
-    /* Quality Slider */
     input[type=range] {
         -webkit-appearance: none;
         appearance: none;
@@ -384,12 +377,35 @@
             <label>Rotation: <span id="rotationVal">0°</span></label>
             <div class="input-group" style="align-items: center;">
                 <button id="rotateLeft" class="btn btn-icon" title="Rotate -90°">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 2v6h6M21.5 22v-6h-6"></path><path d="M22 11.5A10 10 0 0 0 3.5 12.5"></path></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 2v6h6M2.5 2v6h6M21.5 22v-6h-6"/><path d="M22 11.5A10 10 0 0 0 3.5 12.5"/></svg>
                 </button>
                 <input id="rotation" type="range" min="-180" max="180" step="1" value="0" style="margin-top: 0;">
                 <button id="rotateRight" class="btn btn-icon" title="Rotate +90°">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 22v-6h-6M2.5 2v6h6"></path><path d="M2.5 12.5a10 10 0 0 0 19-1"></path></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 22v-6h-6M2.5 2v6h6"/><path d="M2.5 12.5a10 10 0 0 0 19-1"/></svg>
                 </button>
+            </div>
+        </div>
+        
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1rem;">
+            <h3 class="panel-title" style="border-bottom: none; padding-bottom: 0; font-size: 1rem; margin-bottom: 0;">Image Adjustments</h3>
+            <button id="resetFiltersBtn" class="btn" style="padding: 0.25rem 0.75rem; font-size: 0.7rem; text-transform: none; background: #555;">Reset</button>
+        </div>
+        <div class="form-group" style="gap: 0.5rem; display: flex; flex-direction: column;">
+            <div>
+                <label>Brightness: <span id="brightnessVal">100%</span></label>
+                <input id="brightness" type="range" min="0" max="200" step="1" value="100" />
+            </div>
+            <div>
+                <label>Contrast: <span id="contrastVal">100%</span></label>
+                <input id="contrast" type="range" min="0" max="200" step="1" value="100" />
+            </div>
+            <div>
+                <label>Saturation: <span id="saturateVal">100%</span></label>
+                <input id="saturate" type="range" min="0" max="200" step="1" value="100" />
+            </div>
+            <div>
+                <label>Grayscale: <span id="grayscaleVal">0%</span></label>
+                <input id="grayscale" type="range" min="0" max="100" step="1" value="0" />
             </div>
         </div>
         <div class="form-group">
@@ -456,11 +472,20 @@
     const zoomIn = document.getElementById('zoomIn');
     const zoomOut = document.getElementById('zoomOut');
     const resetBtn = document.getElementById('reset');
-    // --- NEW Rotation elements ---
     const rotation = document.getElementById('rotation');
     const rotationVal = document.getElementById('rotationVal');
     const rotateLeft = document.getElementById('rotateLeft');
     const rotateRight = document.getElementById('rotateRight');
+    // --- NEW Filter elements ---
+    const brightness = document.getElementById('brightness');
+    const brightnessVal = document.getElementById('brightnessVal');
+    const contrast = document.getElementById('contrast');
+    const contrastVal = document.getElementById('contrastVal');
+    const saturate = document.getElementById('saturate');
+    const saturateVal = document.getElementById('saturateVal');
+    const grayscale = document.getElementById('grayscale');
+    const grayscaleVal = document.getElementById('grayscaleVal');
+    const resetFiltersBtn = document.getElementById('resetFiltersBtn');
     // ---
     const quality = document.getElementById('quality');
     const qualityVal = document.getElementById('qualityVal');
@@ -483,21 +508,43 @@
       return mb.toFixed(3) + ' MB';
     }
     
-    // --- Core Logic: Update Preview and Prepare Export (Live Canvas) ---
+    // --- NEW: Filter Logic ---
+    function getFilterString() {
+        return `brightness(${brightness.value}%) contrast(${contrast.value}%) saturate(${saturate.value}%) grayscale(${grayscale.value}%)`;
+    }
+
+    function applyFiltersToPreview() {
+        if (!cropper) return;
+        const cropperCanvas = cropper.cropper.querySelector('.cropper-canvas');
+        if (cropperCanvas) {
+            cropperCanvas.style.filter = getFilterString();
+        }
+    }
+    
+    function resetFilters() {
+        brightness.value = 100;
+        contrast.value = 100;
+        saturate.value = 100;
+        grayscale.value = 0;
+        brightnessVal.textContent = '100%';
+        contrastVal.textContent = '100%';
+        saturateVal.textContent = '100%';
+        grayscaleVal.textContent = '0%';
+        applyFiltersToPreview();
+        updatePreviewAndExport();
+    }
+
+    // --- Core Logic: Update Preview and Prepare Export ---
     function updatePreviewAndExport(){
       if(!cropper) return;
       
       const mimeType = formatSelect.value;
       const qualityValue = parseFloat(quality.value);
       
-      // Get crop box data
-      const cropData = cropper.getData(true); // rounded
-      
-      // Decide output size
+      const cropData = cropper.getData(true);
       let targetW = parseInt(outW.value) || Math.round(cropData.width);
       let targetH = parseInt(outH.value) || Math.round(cropData.height);
       
-      // Get canvas
       const canvas = cropper.getCroppedCanvas({ 
           width: targetW, 
           height: targetH, 
@@ -505,27 +552,24 @@
       });
       if(!canvas){ return; }
 
-      // 1. Show Preview
+      // --- NEW: Apply filters to the output canvas ---
+      const ctx = canvas.getContext('2d');
+      ctx.filter = getFilterString();
+      ctx.drawImage(canvas, 0, 0);
+      // ---
+
       resultPreview.innerHTML = '';
       const img = document.createElement('img');
       img.style.maxWidth = '100%';
       img.style.maxHeight = '300px';
       
-      let dataURL;
-      if (mimeType === 'image/png') {
-          dataURL = canvas.toDataURL(mimeType, 1.0);
-      } else {
-          dataURL = canvas.toDataURL(mimeType, qualityValue);
-      }
-
+      let dataURL = (mimeType === 'image/png') ? canvas.toDataURL(mimeType) : canvas.toDataURL(mimeType, qualityValue);
       img.src = dataURL;
       resultPreview.appendChild(img);
 
-      // 2. Update Info
       resDim.querySelector('span').textContent = `${targetW} × ${targetH} px`;
       resType.querySelector('span').textContent = mimeType.split('/')[1].toUpperCase();
 
-      // 3. Prepare Download
       canvas.toBlob((blob)=>{
         if(!blob) return;
         
@@ -536,10 +580,9 @@
         downloadLink.href = url;
         
         const ext = (mimeType === 'image/png') ? 'png' : (mimeType === 'image/webp' ? 'webp' : 'jpg');
-        const outName = (currentFile && currentFile.name) ? (currentFile.name.replace(/\.[^/.]+$/, '') + '✓.' + ext) : ('cropped.' + ext);
+        const originalName = currentFile?.name.replace(/\.[^/.]+$/, '') || 'cropped';
+        downloadLink.download = `${originalName}-edited.${ext}`;
         
-        downloadLink.download = outName;
-        downloadLink.textContent = 'Download Image';
         downloadLink.classList.remove('hidden');
       }, mimeType, qualityValue);
     }
@@ -569,10 +612,10 @@
             movable: true,
             zoomable: true,
             scalable: false,
-            rotatable: true, // Enable rotation
+            rotatable: true,
             responsive: true,
-            // UPDATED: Use 'crop' event for all changes (zoom, move, rotate)
-            crop: updatePreviewAndExport
+            crop: updatePreviewAndExport,
+            ready: applyFiltersToPreview // Apply filters on init
           });
           
           cropper.setAspectRatio(NaN); 
@@ -585,13 +628,7 @@
     ratioSelect.addEventListener('change', ()=>{
         if(!cropper) return;
         const r = ratioSelect.value;
-        const ratio = Number(r);
-        
-        if(ratio === 0) {
-            cropper.setAspectRatio(NaN); 
-        } else {
-            cropper.setAspectRatio(eval(r));
-        }
+        cropper.setAspectRatio(r === '0' ? NaN : eval(r));
     });
 
     zoomIn.addEventListener('click', ()=>{ if(cropper) cropper.zoom(0.1); });
@@ -600,18 +637,16 @@
     resetBtn.addEventListener('click', ()=>{ 
         if(cropper) {
             cropper.reset();
-            // Also reset rotation slider UI
             rotation.value = 0;
             rotationVal.textContent = '0°';
+            resetFilters(); // Also reset image adjustments
         }
     });
     
-    // --- NEW Rotation Event Listeners ---
     rotation.addEventListener('input', ()=>{
       if(!cropper) return;
-      const val = rotation.value;
-      rotationVal.textContent = `${val}°`;
-      cropper.rotateTo(Number(val));
+      rotationVal.textContent = `${rotation.value}°`;
+      cropper.rotateTo(Number(rotation.value));
     });
     
     rotateLeft.addEventListener('click', ()=>{
@@ -629,9 +664,32 @@
         rotation.value = currentRotation;
         rotationVal.textContent = `${currentRotation}°`;
     });
+
+    // --- NEW Filter Event Listeners ---
+    brightness.addEventListener('input', () => {
+        brightnessVal.textContent = `${brightness.value}%`;
+        applyFiltersToPreview();
+    });
+    contrast.addEventListener('input', () => {
+        contrastVal.textContent = `${contrast.value}%`;
+        applyFiltersToPreview();
+    });
+    saturate.addEventListener('input', () => {
+        saturateVal.textContent = `${saturate.value}%`;
+        applyFiltersToPreview();
+    });
+    grayscale.addEventListener('input', () => {
+        grayscaleVal.textContent = `${grayscale.value}%`;
+        applyFiltersToPreview();
+    });
+    
+    [brightness, contrast, saturate, grayscale].forEach(slider => {
+      slider.addEventListener('change', updatePreviewAndExport);
+    });
+
+    resetFiltersBtn.addEventListener('click', resetFilters);
     // ---
 
-    // Input/Select listeners for live update
     quality.addEventListener('input', ()=>{ 
         qualityVal.textContent = quality.value;
         updatePreviewAndExport();
@@ -660,12 +718,11 @@
       fileInput.value = null;
       currentFile = null;
       ratioSelect.value = '0';
-      // Reset rotation UI
       rotation.value = 0;
       rotationVal.textContent = '0°';
+      resetFilters();
     });
 
-    // Keyboard shortcuts for convenience
     window.addEventListener('keydown', (e)=>{
       if(!cropper) return;
       if(e.key === '+') cropper.zoom(0.1);
